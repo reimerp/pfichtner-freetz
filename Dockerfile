@@ -1,13 +1,13 @@
-ARG PARENT=ubuntu:20.04
+ARG PARENT=ubuntu:24.04
 FROM $PARENT
 
 # https://stackoverflow.com/questions/44438637/arg-substitution-in-run-command-not-working-for-dockerfile/56748289#56748289
 ARG PARENT
 ARG PROVISION_DIR=/tmp/${PARENT}
 
-ADD provisioning/${PARENT} ${PROVISION_DIR}
-ADD provisioning/files ${PROVISION_DIR}/files
-ADD provisioning/scripts ${PROVISION_DIR}/scripts
+COPY provisioning/${PARENT} ${PROVISION_DIR}
+COPY provisioning/files ${PROVISION_DIR}/files
+COPY provisioning/scripts ${PROVISION_DIR}/scripts
 WORKDIR ${PROVISION_DIR}
 RUN [ -r "${PROVISION_DIR}/envs" ] && export $(cat ${PROVISION_DIR}/envs | xargs); for SCRIPT in ${PROVISION_DIR}/*.sh; do (echo set -e && cat $SCRIPT) | bash || exit $?; done && rm -rf ${PROVISION_DIR}
 
@@ -15,6 +15,6 @@ RUN [ -r "${PROVISION_DIR}/envs" ] && export $(cat ${PROVISION_DIR}/envs | xargs
 RUN useradd -G sudo -s /bin/bash -d /workspace -m builduser
 
 WORKDIR /
-ADD entrypoint.sh /usr/local/bin
+COPY entrypoint.sh /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

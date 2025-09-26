@@ -4,6 +4,11 @@ HTTP_SOURCE=$1
 CACHE=$2
 TARGET=$3
 
+fail() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
 deps() {
 	CONTENT="$1"
 	FILTER="$2"
@@ -45,7 +50,9 @@ writeDepsJsonFile() {
 
 	[ -d $(dirname "$TARGET_FILE") ] || mkdir -p $(dirname "$TARGET_FILE")
 	
- 	CONTENT=$(content "$SOURCE_FILE" "$DISTRO_ENTRY") 
+	CONTENT=$(content "$SOURCE_FILE" "$DISTRO_ENTRY")
+	[ -z "$CONTENT" ] && fail "No content for $DISTRO_ENTRY"
+
 	DEPS=$(deps "$CONTENT" "$PATTERN")
 	PACKAGES=$(linesToJsonArray "$DEPS")
 
@@ -71,6 +78,7 @@ writePackageFile() {
 
 	PREFIX='sudo() { eval ${*@Q}; }'
 	CONTENT=$(content "$SOURCE_FILE" "$DISTRO_ENTRY")
+	[ -z "$CONTENT" ] && fail "No content for $DISTRO_ENTRY"
 	echo -e "$PREFIX\n$CONTENT\n" >"$TARGET_FILE"
 }
 
@@ -101,17 +109,23 @@ UBUNTU_PATTERN='^sudo apt-get -y install |^sudo apt -y install '
 DEBIAN_PATTERN="$UBUNTU_PATTERN"
 FEDORA_PATTERN='^sudo dnf -y install '
 
-writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:22.04" "$OVERWRITE" ' - Ubuntu 22'     "$UBUNTU_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:20.04" "$OVERWRITE" ' - Ubuntu 20'     "$UBUNTU_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:18.04" "$OVERWRITE" ' - Ubuntu 18'     "$UBUNTU_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:16.04" "$OVERWRITE" ' - Ubuntu 15\/16' "$UBUNTU_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:14.04" "$OVERWRITE" ' - Ubuntu 14'     "$UBUNTU_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:24.04" "$OVERWRITE" ' - Ubuntu 23\/24'     "$UBUNTU_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:22.04" "$OVERWRITE" ' - Ubuntu 22'         "$UBUNTU_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:20.04" "$OVERWRITE" ' - Ubuntu 20'         "$UBUNTU_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:18.04" "$OVERWRITE" ' - Ubuntu 18'         "$UBUNTU_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:16.04" "$OVERWRITE" ' - Ubuntu 15\/16'     "$UBUNTU_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "ubuntu:14.04" "$OVERWRITE" ' - Ubuntu 14'         "$UBUNTU_PATTERN"
 
-writeFiles "$CACHE/$FILENAME" "$TARGET" "debian:11"    "$OVERWRITE" ' - Debian 11'     "$DEBIAN_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "debian:12"    "$OVERWRITE" ' - Debian 12'         "$DEBIAN_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "debian:11"    "$OVERWRITE" ' - Debian 11'         "$DEBIAN_PATTERN"
 
-writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:37"    "$OVERWRITE" ' - Fedora 37'     "$FEDORA_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:36"    "$OVERWRITE" ' - Fedora 36'     "$FEDORA_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:35"    "$OVERWRITE" ' - Fedora 35'     "$FEDORA_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:34"    "$OVERWRITE" ' - Fedora 33\/34' "$FEDORA_PATTERN"
-writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:33"    "$OVERWRITE" ' - Fedora 33\/34' "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:41"    "$OVERWRITE" ' - Fedora 41'         "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:40"    "$OVERWRITE" ' - Fedora 40'         "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:39"    "$OVERWRITE" ' - Fedora 37\/38\/39' "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:38"    "$OVERWRITE" ' - Fedora 37\/38\/39' "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:37"    "$OVERWRITE" ' - Fedora 37\/38\/39' "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:36"    "$OVERWRITE" ' - Fedora 36'         "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:35"    "$OVERWRITE" ' - Fedora 35'         "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:34"    "$OVERWRITE" ' - Fedora 33\/34'     "$FEDORA_PATTERN"
+writeFiles "$CACHE/$FILENAME" "$TARGET" "fedora:33"    "$OVERWRITE" ' - Fedora 33\/34'     "$FEDORA_PATTERN"
 

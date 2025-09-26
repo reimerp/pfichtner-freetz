@@ -6,11 +6,20 @@ jobs:
   comment_pr:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Run scripts/dependency-diff.sh
       run: bash scripts/dependency-diff.sh provisioning >.dependency-diff.txt
+    - name: Check if .dependency-diff.txt exists and is not empty
+      id: check_file
+      run: |
+        if [ -s .dependency-diff.txt ]; then
+          echo "::set-output name=file_exists::true"
+        else
+          echo "::set-output name=file_exists::false"
+        fi
     - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v2
+      uses: thollander/actions-comment-pull-request@v3
+      if: steps.check_file.outputs.file_exists == 'true'
       with:
-        filePath: .dependency-diff.txt
+        file-path: .dependency-diff.txt
 
